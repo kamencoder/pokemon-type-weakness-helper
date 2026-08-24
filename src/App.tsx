@@ -145,6 +145,19 @@ function App() {
         total: matchupQueue.length,
         answerHistory: newHistory,
       });
+      
+      const finalCorrect = answersCorrectCount + (correct ? 1 : 0);
+      const finalTotal = questionsAnsweredCount + 1;
+      const scorePercentage = Math.round(finalCorrect / finalTotal * 100);
+      posthog.capture('test_results', {
+        score_percentage: scorePercentage,
+        correct: finalCorrect,
+        total_questions: finalTotal,
+        settings_question_count: settings.numberOfQuestions,
+        settings_test_type: settings.mode,
+        settings_daily_date: settings.dailyDate,
+        settings_dual_types: settings.includeDualTypes
+      })
     }
 
     posthog.capture('matchup_answered', {
