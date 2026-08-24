@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import posthog from 'posthog-js'
 import './App.css'
-import { effectivenessDetails, evaluateMatchup, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
+import { effectivenessDetails, evaluateMatchup, getExpectedScorePercentage, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
 import { getDailyMatchups } from './data/weaknesses';
 import { getInitialSettings, type Settings, type Mode } from './Settings';
 import { saveDailyResult, loadDailyResult } from './storage';
@@ -151,6 +151,7 @@ function App() {
       const scorePercentage = Math.round(finalCorrect / finalTotal * 100);
       posthog.capture('test_results', {
         score_percentage: scorePercentage,
+        expected_percentage: getExpectedScorePercentage(matchupQueue),
         correct: finalCorrect,
         total_questions: finalTotal,
         settings_question_count: settings.numberOfQuestions,

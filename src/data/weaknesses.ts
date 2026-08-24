@@ -613,6 +613,30 @@ export type Matchup = {
     attackingType: TypeDetail;
     defendingTypes: TypeDetail[];
 }
+
+const difficultyCorrectProbability: Record<MatchupDifficulty, number> = {
+    1: 0.85,
+    2: 0.65,
+    3: 0.45,
+};
+
+export const getMatchupCorrectProbability = (matchup: Matchup): number => {
+    return matchup.defendingTypes.reduce((probability, defendingType) => {
+        const effectiveness = typeDetailList[matchup.attackingType.name].effectiveness[defendingType.name];
+        return probability * difficultyCorrectProbability[effectiveness.difficulty];
+    }, 1);
+}
+
+export const getExpectedScorePercentage = (matchups: Matchup[]): number => {
+    if (matchups.length === 0) return 0;
+
+    const expectedCorrectAnswers = matchups.reduce(
+        (total, matchup) => total + getMatchupCorrectProbability(matchup),
+        0,
+    );
+    return expectedCorrectAnswers / matchups.length * 100;
+}
+
 export const getRandomMatchup = (maxDefendingTypes: number = 1): Matchup => {
     const types = Object.keys(typeDetailList) as PokemonTypeName[];
     const attackingType = types[Math.floor(Math.random() * types.length)];
