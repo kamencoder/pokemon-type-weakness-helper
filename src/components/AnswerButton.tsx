@@ -1,4 +1,5 @@
 import { getEffectivenessColor, type EffectivenessModifier, type EffectivenessLevelDetail } from '../data/weaknesses';
+import type { Settings } from '../Settings';
 
 type AnswerButtonProps = {
   effectivenessDetail: EffectivenessLevelDetail;
@@ -17,7 +18,7 @@ export function AnswerButton({
   lastAnswerValue,
   onAnswer,
 }: AnswerButtonProps) {
-  const { value, buttonText } = effectivenessDetail;
+  const { value, buttonText, easyButtonText } = effectivenessDetail;
 
   if (!includeDualTypes && (value === 0.25 || value === 4)) {
     return null;
@@ -39,12 +40,12 @@ export function AnswerButton({
 
   return (
     <button
-      className={`answer-button ${stateClass}`}
+      className={`answer-button ${stateClass} ${!includeDualTypes ? 'easymode' : ''}`}
       style={{ backgroundColor: getEffectivenessColor(value) }}
       onClick={() => onAnswer(value)}
       disabled={showResults}
     >
-      {buttonText}
+      {includeDualTypes ? buttonText : easyButtonText}
     </button>
   );
 }
