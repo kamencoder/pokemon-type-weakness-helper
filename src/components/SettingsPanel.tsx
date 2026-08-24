@@ -45,6 +45,8 @@ export function SettingsPanel({
             className="settings-date"
             value={pendingSettings.dailyDate}
             max={new Date().toISOString().slice(0, 10)}
+            onKeyDown={() => false} 
+            onClick={e => {(e.target as any)?.showPicker()}}
             onChange={e => setPendingSettings(s => ({ ...s, dailyDate: e.target.value }))}
           />
         </div>
