@@ -32,6 +32,12 @@
   transition: color 0.15s;
 }
 
+@media (max-width: 400px) {
+  .settings-trigger {
+    position: fixed;
+  }
+}
+
 .settings-trigger:hover {
   color: var(--text);
 }
