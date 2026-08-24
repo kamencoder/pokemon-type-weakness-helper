@@ -17,7 +17,7 @@ import { ScoreView, type AnswerRecord } from './components/ScoreView';
 const DAILY_QUESTION_COUNT = 20;
 
 function buildMatchupQueue(s: Settings): Matchup[] {
-  if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT);
+  if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT, s.dailyDate);
 return Array.from({ length: s.numberOfQuestions }, () =>
     getRandomMatchup(s.includeDualTypes ? 2 : 1)
   );
@@ -66,7 +66,8 @@ function App() {
   const settingsDirty =
     pendingSettings.numberOfQuestions !== settings.numberOfQuestions ||
     pendingSettings.includeDualTypes !== settings.includeDualTypes ||
-    pendingSettings.mode !== settings.mode;
+    pendingSettings.mode !== settings.mode ||
+    pendingSettings.dailyDate !== settings.dailyDate;
 
   // Always show 0.25x and 4x buttons for curated modes (where they can appear);
   // for random mode, hide them when dual types are disabled.
@@ -145,7 +146,7 @@ function App() {
 
   return (
     <>
-      <Header mode={settings.mode} onSettingsClick={toggleSettings} />
+      <Header mode={settings.mode} dailyDate={settings.dailyDate} onSettingsClick={toggleSettings} />
 
       {settingsOpen && (
         <SettingsPanel

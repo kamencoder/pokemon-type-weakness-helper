@@ -150,7 +150,7 @@ export const MatchupAnecdotes = {
   GhostAndSteel: "Armor can't block what walks through walls, and a ghost gets no grip on cold steel (x1 both ways).",
   GhostAndFairy: "Fairy tales and ghost stories live on the same shelf. Neither one has the upper hand (x1 both ways).",
   DragonAndDragon: "Witness the absolute destruction of a Kaiju fight (x2 both ways).",
-  DragonAndFairy: "Every fairy tale ends with the dragon slain by a hero pure of heart (x2), and all that brute force can't lay a finger on magic (x0).",
+  DragonAndFairy: "In Fairy tales, Dragons are slain at the end (x2). The Fairy's magic completely shields the hero from the dragon (x0).",
   DarkAndDark: "Can't con a con-man (x0.5 both ways).",
   DarkAndFairy: "The shining light of the fairy beats back the darkness."
 }
@@ -702,8 +702,8 @@ function mulberry32(seed: number): () => number {
     };
 }
 
-export function getDailyMatchups(count: number): Matchup[] {
-    const d = new Date();
+export function getDailyMatchups(count: number, date?: string): Matchup[] {
+    const d = date ? new Date(date + 'T00:00:00') : new Date();
     const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
     const rng = mulberry32(seed);
     const types = Object.keys(typeDetailList) as PokemonTypeName[];

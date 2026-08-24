@@ -7,16 +7,20 @@ const modeDisplayName: Record<Mode, string> = {
 
 type HeaderProps = {
   mode: Mode;
+  dailyDate: string;
   onSettingsClick: () => void;
 };
 
-export function Header({ mode, onSettingsClick }: HeaderProps) {
+export function Header({ mode, dailyDate, onSettingsClick }: HeaderProps) {
+  const dailyLabel = mode === 'daily'
+    ? ' ' + new Date(dailyDate + 'T00:00:00').toLocaleDateString()
+    : '';
   return (
     <header className="app-header">
       <h1 className="app-title">Pokémon Matchup Quiz</h1>
       <p className="app-subtitle">Guess the damage multiplier for each type matchup</p>
       <span className="mode-badge">
-        {modeDisplayName[mode] + (mode === 'daily' ? (' ' + (new Date()).toLocaleDateString()) : '')}
+        {modeDisplayName[mode] + dailyLabel}
       </span>
       <button className="settings-trigger" onClick={onSettingsClick} aria-label="Settings">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
