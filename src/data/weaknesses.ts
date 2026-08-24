@@ -150,7 +150,7 @@ export const MatchupAnecdotes = {
   GhostAndSteel: "Armor can't block what walks through walls, and a ghost gets no grip on cold steel (x1 both ways).",
   GhostAndFairy: "Fairy tales and ghost stories live on the same shelf. Neither one has the upper hand (x1 both ways).",
   DragonAndDragon: "Witness the absolute destruction of a Kaiju fight (x2 both ways).",
-  DragonAndFairy: "Every fairy tale ends with the dragon slain by a hero pure of heart (x2), and all that brute force can't lay a finger on magic (x0).",
+  DragonAndFairy: "In Fairy tales, Dragons are slain at the end (x2). The Fairy's magic completely shields the hero from the dragon (x0).",
   DarkAndDark: "Can't con a con-man (x0.5 both ways).",
   DarkAndFairy: "The shining light of the fairy beats back the darkness."
 }
@@ -613,6 +613,30 @@ export type Matchup = {
     attackingType: TypeDetail;
     defendingTypes: TypeDetail[];
 }
+
+const difficultyCorrectProbability: Record<MatchupDifficulty, number> = {
+    1: 0.85,
+    2: 0.65,
+    3: 0.45,
+};
+
+export const getMatchupCorrectProbability = (matchup: Matchup): number => {
+    return matchup.defendingTypes.reduce((probability, defendingType) => {
+        const effectiveness = typeDetailList[matchup.attackingType.name].effectiveness[defendingType.name];
+        return probability * difficultyCorrectProbability[effectiveness.difficulty];
+    }, 1);
+}
+
+export const getExpectedScorePercentage = (matchups: Matchup[]): number => {
+    if (matchups.length === 0) return 0;
+
+    const expectedCorrectAnswers = matchups.reduce(
+        (total, matchup) => total + getMatchupCorrectProbability(matchup),
+        0,
+    );
+    return expectedCorrectAnswers / matchups.length * 100;
+}
+
 export const getRandomMatchup = (maxDefendingTypes: number = 1): Matchup => {
     const types = Object.keys(typeDetailList) as PokemonTypeName[];
     const attackingType = types[Math.floor(Math.random() * types.length)];
@@ -673,18 +697,19 @@ export const getEffectivenessColor = (effectiveness?: EffectivenessModifier): st
 export type EffectivenessLevelDetail = {
     value: EffectivenessModifier;
     buttonText: string;
+    easyButtonText?: string;
     description: string;
     helpTitle: string;
     helpText: string;
     color: string;
 }
 export const effectivenessDetails: { [key in EffectivenessModifier]: EffectivenessLevelDetail } = {
-    0: { value: 0, buttonText: '0x', description: 'No Effect (x0)', helpTitle: 'Immune', helpText: 'Takes no damage because the one of the types of the defending pokemon is entirely immune to damage from the attack type.', color: '#888' },
-    0.25: { value: 0.25, buttonText: '0.25x', description: 'Extremely Ineffective (1⁄4)', helpTitle: 'Extremely Ineffective', helpText: 'Defending pokemon takes ¼ damage because BOTH of the defending types are resistant to the attacking type.', color: '#FFD93B' },
-    0.5: { value: 0.5, buttonText: '0.5x', description: 'Not Very Effective (1⁄2)', helpTitle: 'Not Very Effective', helpText: 'Defending pokemon takes ½ damage because one of the defending types are resistant.', color: '#FFA531' },
-    1: { value: 1, buttonText: '1x', description: 'Normal Effectiveness (x1)', helpTitle: 'Neutral', helpText: 'Defending pokemon takes normal damage. Usually this is because the defending types have no particular weakness or resistance to the attacking type. It can also happen when the defending pokemon has one type that is weak to the attack type and another type that is resistent. In that case they negate each other (0.5 x 2 = 1).', color: '#FF6B1A' },
-    2: { value: 2, buttonText: '2x', description: 'Super Effective (2x)', helpTitle: 'Super Effective', helpText: 'Defending pokemon takes double damage because one of the defending types are weak to the attacking type.', color: '#E63946' },
-    4: { value: 4, buttonText: '4x', description: 'Extremely Effective (4x)', helpTitle: 'Extremely Effective', helpText: 'Defending pokemon takes quadrupal damage because BOTH of the defending types are very weak to the attacking type.', color: '#dd539fff' },
+    0: { value: 0, buttonText: '0x', easyButtonText: 'Immune', description: 'No Effect (x0)', helpTitle: 'Immune', helpText: 'Takes no damage because the one of the types of the defending pokemon is entirely immune to damage from the attack type.', color: '#888' },
+    0.25: { value: 0.25, buttonText: '0.25x', easyButtonText: undefined, description: 'Extremely Ineffective (1⁄4)', helpTitle: 'Extremely Ineffective', helpText: 'Defending pokemon takes ¼ damage because BOTH of the defending types are resistant to the attacking type.', color: '#FFD93B' },
+    0.5: { value: 0.5, buttonText: '0.5x', easyButtonText: 'Not effective', description: 'Not Very Effective (1⁄2)', helpTitle: 'Not Very Effective', helpText: 'Defending pokemon takes ½ damage because one of the defending types are resistant.', color: '#FFA531' },
+    1: { value: 1, buttonText: '1x', easyButtonText: 'Regular damage', description: 'Normal Effectiveness (x1)', helpTitle: 'Neutral', helpText: 'Defending pokemon takes normal damage. Usually this is because the defending types have no particular weakness or resistance to the attacking type. It can also happen when the defending pokemon has one type that is weak to the attack type and another type that is resistent. In that case they negate each other (0.5 x 2 = 1).', color: '#FF6B1A' },
+    2: { value: 2, buttonText: '2x', easyButtonText: 'Super effective', description: 'Super Effective (2x)', helpTitle: 'Super Effective', helpText: 'Defending pokemon takes double damage because one of the defending types are weak to the attacking type.', color: '#E63946' },
+    4: { value: 4, buttonText: '4x', easyButtonText: undefined, description: 'Extremely Effective (4x)', helpTitle: 'Extremely Effective', helpText: 'Defending pokemon takes quadrupal damage because BOTH of the defending types are very weak to the attacking type.', color: '#dd539fff' },
 };
 
 export const effectivenessValues: EffectivenessModifier[] = [0, 0.25, 0.5, 1, 2, 4];
@@ -702,8 +727,8 @@ function mulberry32(seed: number): () => number {
     };
 }
 
-export function getDailyMatchups(count: number): Matchup[] {
-    const d = new Date();
+export function getDailyMatchups(count: number, date?: string): Matchup[] {
+    const d = date ? new Date(date + 'T00:00:00') : new Date();
     const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
     const rng = mulberry32(seed);
     const types = Object.keys(typeDetailList) as PokemonTypeName[];

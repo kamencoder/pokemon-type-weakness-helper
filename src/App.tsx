@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import posthog from 'posthog-js'
 import './App.css'
-import { effectivenessDetails, evaluateMatchup, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
+import { effectivenessDetails, evaluateMatchup, getExpectedScorePercentage, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
 import { getDailyMatchups } from './data/weaknesses';
 import { getInitialSettings, type Settings, type Mode } from './Settings';
+import { saveDailyResult, loadDailyResult } from './storage';
 
 import { Header } from './components/Header';
 import { SettingsPanel } from './components/SettingsPanel';
@@ -17,27 +18,30 @@ import { ScoreView, type AnswerRecord } from './components/ScoreView';
 const DAILY_QUESTION_COUNT = 20;
 
 function buildMatchupQueue(s: Settings): Matchup[] {
-  if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT);
+  if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT, s.dailyDate);
 return Array.from({ length: s.numberOfQuestions }, () =>
     getRandomMatchup(s.includeDualTypes ? 2 : 1)
   );
 }
 
 const initialSettings = getInitialSettings();
+const storedInitial = initialSettings.mode === 'daily'
+  ? loadDailyResult(initialSettings.dailyDate)
+  : null;
 
 function App() {
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [matchupQueue, setMatchupQueue] = useState<Matchup[]>(() => buildMatchupQueue(initialSettings));
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answersCorrectCount, setAnswersCorrectCount] = useState(0);
-  const [showResults, setShowResults] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(storedInitial ? storedInitial.total - 1 : 0);
+  const [answersCorrectCount, setAnswersCorrectCount] = useState(storedInitial?.score ?? 0);
+  const [showResults, setShowResults] = useState(storedInitial != null);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | undefined>(undefined);
   const [lastAnswerValue, setLastAnswerValue] = useState<EffectivenessModifier | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [pendingSettings, setPendingSettings] = useState<Settings>(initialSettings);
-  const [viewScore, setViewScore] = useState(false);
+  const [viewScore, setViewScore] = useState(storedInitial != null);
   const [showHelp, setShowHelp] = useState(false);
-  const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>([]);
+  const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>(storedInitial?.answerHistory ?? []);
 
   useEffect(() => {
     if (showResults) {
@@ -66,22 +70,23 @@ function App() {
   const settingsDirty =
     pendingSettings.numberOfQuestions !== settings.numberOfQuestions ||
     pendingSettings.includeDualTypes !== settings.includeDualTypes ||
-    pendingSettings.mode !== settings.mode;
+    pendingSettings.mode !== settings.mode ||
+    pendingSettings.dailyDate !== settings.dailyDate;
 
   // Always show 0.25x and 4x buttons for curated modes (where they can appear);
   // for random mode, hide them when dual types are disabled.
   const showAllMultiplierButtons = settings.mode !== 'random' || settings.includeDualTypes;
 
   const resetQuiz = (s: Settings) => {
-    const queue = buildMatchupQueue(s);
-    setMatchupQueue(queue);
-    setCurrentIndex(0);
-    setAnswersCorrectCount(0);
-    setShowResults(false);
+    const stored = s.mode === 'daily' ? loadDailyResult(s.dailyDate) : null;
+    setMatchupQueue(buildMatchupQueue(s));
+    setCurrentIndex(stored ? stored.total - 1 : 0);
+    setAnswersCorrectCount(stored ? stored.score : 0);
+    setShowResults(stored != null);
     setLastAnswerCorrect(undefined);
     setLastAnswerValue(undefined);
-    setViewScore(false);
-    setAnswerHistory([]);
+    setViewScore(stored != null);
+    setAnswerHistory(stored ? stored.answerHistory : []);
   };
 
   const toggleSettings = () => {
@@ -123,14 +128,38 @@ function App() {
 
     const defending = currentMatchup!.defendingTypes.map(d => d.name).join('/');
 
-    setAnswerHistory(h => [...h, {
+    const newRecord = {
       questionNumber: currentIndex + 1,
       matchupLabel: `${currentMatchup!.attackingType.name} → ${defending}`,
       correct,
       userAnswerText: effectivenessDetails[userAnswer].buttonText,
       correctAnswerText: effectivenessDetails[currentMatchupResults!.totalEffectiveness].buttonText,
       breakdown: resultsBreakdown,
-    }]);
+    };
+    const newHistory = [...answerHistory, newRecord];
+    setAnswerHistory(newHistory);
+
+    if (settings.mode === 'daily' && currentIndex >= matchupQueue.length - 1) {
+      saveDailyResult(settings.dailyDate, {
+        score: answersCorrectCount + (correct ? 1 : 0),
+        total: matchupQueue.length,
+        answerHistory: newHistory,
+      });
+      
+      const finalCorrect = answersCorrectCount + (correct ? 1 : 0);
+      const finalTotal = questionsAnsweredCount + 1;
+      const scorePercentage = Math.round(finalCorrect / finalTotal * 100);
+      posthog.capture('test_results', {
+        score_percentage: scorePercentage,
+        expected_percentage: getExpectedScorePercentage(matchupQueue),
+        correct: finalCorrect,
+        total_questions: finalTotal,
+        settings_question_count: settings.numberOfQuestions,
+        settings_test_type: settings.mode,
+        settings_daily_date: settings.dailyDate,
+        settings_dual_types: settings.includeDualTypes
+      })
+    }
 
     posthog.capture('matchup_answered', {
       matchup: `${currentMatchup!.attackingType.name} vs ${defending}`,
@@ -145,7 +174,7 @@ function App() {
 
   return (
     <>
-      <Header mode={settings.mode} onSettingsClick={toggleSettings} />
+      <Header mode={settings.mode} dailyDate={settings.dailyDate} onSettingsClick={toggleSettings} />
 
       {settingsOpen && (
         <SettingsPanel

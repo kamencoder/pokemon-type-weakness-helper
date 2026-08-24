@@ -32,6 +32,12 @@
   transition: color 0.15s;
 }
 
+@media (max-width: 400px) {
+  .settings-trigger {
+    position: fixed;
+  }
+}
+
 .settings-trigger:hover {
   color: var(--text);
 }
@@ -379,7 +385,7 @@
 
 .answer-button {
   width: clamp(3em, 13vw, 4.5em);
-  height: 3em;
+  min-height: 3em;
   font-size: clamp(14px, 3.5vw, 16px);
   border-radius: 8px;
   cursor: pointer;
@@ -391,11 +397,17 @@
   transition: opacity 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 
+
 .answer-buttons-immune .answer-button {
   height: 1.5em;
   padding-top: 0.1em;
   padding-bottom: 0.1em;
 }
+
+.answer-button.easymode {
+  width: clamp(3em, 26vw, 9em);
+}
+
 
 .answer-button:disabled {
   pointer-events: none;
@@ -489,13 +501,16 @@
   width: clamp(64px, 18vw, 100px);
   height: auto;
   flex-shrink: 0;
+  display: block;
+  align-self: center;
 }
 
 .score-percentage {
   font-size: clamp(4rem, 15vw, 6rem);
   font-weight: 900;
-  line-height: 1;
+  line-height: 0.85;
   letter-spacing: -0.03em;
+  align-self: center;
 }
 
 .score-tier-text {
@@ -566,6 +581,23 @@
 .settings-option:hover:not(.active) {
   border-color: var(--accent);
   color: var(--text);
+}
+
+.settings-date {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.settings-date:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .settings-warning {

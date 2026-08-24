@@ -37,6 +37,21 @@ export function SettingsPanel({
         </div>
       </div>
 
+      {pendingSettings.mode === 'daily' && (
+        <div className="settings-group">
+          <span className="settings-label">Date</span>
+          <input
+            type="date"
+            className="settings-date"
+            value={pendingSettings.dailyDate}
+            max={new Date().toISOString().slice(0, 10)}
+            onKeyDown={() => false} 
+            onClick={e => {(e.target as any)?.showPicker()}}
+            onChange={e => setPendingSettings(s => ({ ...s, dailyDate: e.target.value }))}
+          />
+        </div>
+      )}
+
       {pendingSettings.mode === 'random' && (
         <>
           <div className="settings-group">
@@ -75,7 +90,6 @@ export function SettingsPanel({
 
       {settingsDirty && (
         <>
-          <p className="settings-warning">Saving will restart the current quiz.</p>
           <div className="settings-actions">
             <button className="settings-cancel" onClick={onCancel}>Cancel</button>
             <button className="settings-save" onClick={onSave}>Save & Restart</button>

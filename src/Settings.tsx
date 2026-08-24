@@ -4,12 +4,14 @@ export type Settings = {
     numberOfQuestions: number;
     includeDualTypes: boolean;
     mode: Mode;
+    dailyDate: string;
 }
 
 export const defaultSettings: Settings = {
     numberOfQuestions: 20,
     includeDualTypes: true,
     mode: 'daily',
+    dailyDate: new Date().toISOString().slice(0, 10),
 }
 
 export function getInitialSettings(): Settings {
@@ -35,6 +37,11 @@ export function getInitialSettings(): Settings {
     const dual = get('includeDualTypes');
     if (dual === 'true') result.includeDualTypes = true;
     if (dual === 'false') result.includeDualTypes = false;
+
+    const dailyDate = get('dailyDate');
+    if (dailyDate && /^\d{4}-\d{2}-\d{2}$/.test(dailyDate) && !isNaN(Date.parse(dailyDate))) {
+        result.dailyDate = dailyDate;
+    }
 
     return result;
 }
