@@ -1,4 +1,4 @@
-import type { Settings, Mode } from '../Settings';
+import type { Settings, Mode, DailyMode } from '../Settings';
 
 type SettingsPanelProps = {
   pendingSettings: Settings;
@@ -13,6 +13,11 @@ const visibleModes: { mode: Mode; label: string }[] = [
   { mode: 'random', label: 'Random' },
 ];
 
+const dailyModes: { dailyMode: DailyMode; label: string }[] = [
+  { dailyMode: 'simple', label: 'Simple' },
+  { dailyMode: 'pro', label: 'Pro' },
+];
+
 export function SettingsPanel({
   pendingSettings,
   setPendingSettings,
@@ -22,18 +27,39 @@ export function SettingsPanel({
 }: SettingsPanelProps) {
   return (
     <div className="settings-panel">
+      <p className="settings-panel-header">Settings</p>
+      <button className="settings-close" onClick={onCancel} aria-label="Close settings">✕</button>
+
       <div className="settings-group">
         <span className="settings-label">Mode</span>
-        <div className="settings-options">
-          {visibleModes.map(({ mode, label }) => (
-            <button
-              key={mode}
-              className={`settings-option${pendingSettings.mode === mode ? ' active' : ''}`}
-              onClick={() => setPendingSettings(s => ({ ...s, mode }))}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="settings-mode-controls">
+          <div className="settings-options">
+            {visibleModes.map(({ mode, label }) => (
+              <button
+                key={mode}
+                className={`settings-option${pendingSettings.mode === mode ? ' active' : ''}`}
+                onClick={() => setPendingSettings(s => ({ ...s, mode }))}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {pendingSettings.mode === 'daily' && (
+            <div className="settings-options">
+              {dailyModes.map(({ dailyMode, label }) => (
+                <button
+                  key={dailyMode}
+                  className={`settings-option${pendingSettings.dailyMode === dailyMode ? ' active' : ''}`}
+                  onClick={() => {
+                    const includeDualTypes = dailyMode === 'pro';
+                    setPendingSettings(s => ({ ...s, dailyMode, includeDualTypes }));
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -45,7 +71,7 @@ export function SettingsPanel({
             className="settings-date"
             value={pendingSettings.dailyDate}
             max={new Date().toISOString().slice(0, 10)}
-            onKeyDown={() => false} 
+            onKeyDown={() => false}
             onClick={e => {(e.target as any)?.showPicker()}}
             onChange={e => setPendingSettings(s => ({ ...s, dailyDate: e.target.value }))}
           />
@@ -89,12 +115,10 @@ export function SettingsPanel({
       )}
 
       {settingsDirty && (
-        <>
-          <div className="settings-actions">
-            <button className="settings-cancel" onClick={onCancel}>Cancel</button>
-            <button className="settings-save" onClick={onSave}>Save & Restart</button>
-          </div>
-        </>
+        <div className="settings-actions">
+          <button className="settings-cancel" onClick={onCancel}>Cancel</button>
+          <button className="settings-save" onClick={onSave}>Save & Restart</button>
+        </div>
       )}
     </div>
   );

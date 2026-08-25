@@ -66,6 +66,7 @@
   border: 1.5px solid var(--accent);
   border-radius: 999px;
   padding: 0.2em 0.75em;
+  cursor:pointer;
 }
 
 /* ── Progress ── */
@@ -530,8 +531,64 @@
   color: var(--text-muted);
 }
 
+.try-another-section {
+  margin-top: 1.75rem;
+}
+
+.try-another-header {
+  padding-top: 1em;
+  border-top: 1px solid #333;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin: 0 0 0.625rem;
+}
+
+.try-another-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.try-another-buttons .primary-button {
+  display: inline-block;
+  margin: 0;
+  width: auto;
+}
+
 /* ── Settings panel ── */
+.settings-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.125rem 0.25rem;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.settings-close:hover {
+  color: var(--text);
+}
+
+.settings-panel-header {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: white;
+  margin: 0 0 0.25rem;
+}
+
 .settings-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -544,42 +601,74 @@
 
 .settings-group {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
 }
 
 .settings-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
-.settings-options {
+.settings-mode-controls {
   display: flex;
-  gap: 0.375rem;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.settings-mode-controls .settings-options + .settings-options {
+  border-left: 1px solid var(--border);
+}
+
+.settings-options {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
 }
 
 .settings-option {
   padding: 0.25rem 0.625rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface-raised);
+  border: none;
+  border-right: 1px solid var(--border);
+  background: transparent;
   color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s;
+}
+
+.settings-option:last-child {
+  border-right: none;
+}
+
+/* Options before the active segment use a left border as divider instead of right */
+.settings-options:has(.settings-option.active) .settings-option:not(.active):not(.active ~ .settings-option) {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+/* First option never gets a left border — it's already against the container edge */
+.settings-option:first-child {
+  border-left: none;
 }
 
 .settings-option.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
+  background: rgba(91, 138, 240, 0.18);
+  color: var(--accent);
 }
 
 .settings-option:hover:not(.active) {
-  border-color: var(--accent);
+  background: var(--surface-raised);
   color: var(--text);
 }
 
@@ -611,6 +700,8 @@
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+  border-top: 1px solid #333;
+  padding-top: 1em;
 }
 
 .settings-cancel {

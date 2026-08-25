@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import posthog from 'posthog-js'
 import './App.css'
 import { effectivenessDetails, evaluateMatchup, getExpectedScorePercentage, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
 import { getDailyMatchups } from './data/weaknesses';
-import { getInitialSettings, type Settings, type Mode } from './Settings';
+import { getInitialSettings, type Settings, type Mode, type DailyMode } from './Settings';
 import { saveDailyResult, loadDailyResult } from './storage';
 
 import { Header } from './components/Header';
@@ -18,15 +18,15 @@ import { ScoreView, type AnswerRecord } from './components/ScoreView';
 const DAILY_QUESTION_COUNT = 20;
 
 function buildMatchupQueue(s: Settings): Matchup[] {
-  if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT, s.dailyDate);
-return Array.from({ length: s.numberOfQuestions }, () =>
+  if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT, s.dailyDate, s.dailyMode === 'pro');
+  return Array.from({ length: s.numberOfQuestions }, () =>
     getRandomMatchup(s.includeDualTypes ? 2 : 1)
   );
 }
 
 const initialSettings = getInitialSettings();
 const storedInitial = initialSettings.mode === 'daily'
-  ? loadDailyResult(initialSettings.dailyDate)
+  ? loadDailyResult(initialSettings.dailyDate, initialSettings.dailyMode)
   : null;
 
 function App() {
@@ -71,14 +71,18 @@ function App() {
     pendingSettings.numberOfQuestions !== settings.numberOfQuestions ||
     pendingSettings.includeDualTypes !== settings.includeDualTypes ||
     pendingSettings.mode !== settings.mode ||
-    pendingSettings.dailyDate !== settings.dailyDate;
+    pendingSettings.dailyDate !== settings.dailyDate ||
+    pendingSettings.dailyMode !== settings.dailyMode;
 
-  // Always show 0.25x and 4x buttons for curated modes (where they can appear);
-  // for random mode, hide them when dual types are disabled.
-  const showAllMultiplierButtons = settings.mode !== 'random' || settings.includeDualTypes;
+  // For daily mode, dual types is determined by dailyMode (pro = dual, simple = single).
+  // For random mode, respect the includeDualTypes setting.
+  const effectiveIncludeDualTypes =
+    settings.mode === 'daily' ? settings.dailyMode === 'pro' : settings.includeDualTypes;
+
+  const showAllMultiplierButtons = effectiveIncludeDualTypes;
 
   const resetQuiz = (s: Settings) => {
-    const stored = s.mode === 'daily' ? loadDailyResult(s.dailyDate) : null;
+    const stored = s.mode === 'daily' ? loadDailyResult(s.dailyDate, s.dailyMode) : null;
     setMatchupQueue(buildMatchupQueue(s));
     setCurrentIndex(stored ? stored.total - 1 : 0);
     setAnswersCorrectCount(stored ? stored.score : 0);
@@ -112,8 +116,11 @@ function App() {
     setCurrentIndex(i => i + 1);
   };
 
-  const onTryMode = (mode: Mode) => {
+  const onTryMode = (mode: Mode, dailyMode?: DailyMode) => {
     const newSettings = { ...settings, mode };
+    if (dailyMode){
+      newSettings.dailyMode = dailyMode;
+    }
     setSettings(newSettings);
     setPendingSettings(newSettings);
     resetQuiz(newSettings);
@@ -140,12 +147,12 @@ function App() {
     setAnswerHistory(newHistory);
 
     if (settings.mode === 'daily' && currentIndex >= matchupQueue.length - 1) {
-      saveDailyResult(settings.dailyDate, {
+      saveDailyResult(settings.dailyDate, settings.dailyMode, {
         score: answersCorrectCount + (correct ? 1 : 0),
         total: matchupQueue.length,
         answerHistory: newHistory,
       });
-      
+
       const finalCorrect = answersCorrectCount + (correct ? 1 : 0);
       const finalTotal = questionsAnsweredCount + 1;
       const scorePercentage = Math.round(finalCorrect / finalTotal * 100);
@@ -157,7 +164,8 @@ function App() {
         settings_question_count: settings.numberOfQuestions,
         settings_test_type: settings.mode,
         settings_daily_date: settings.dailyDate,
-        settings_dual_types: settings.includeDualTypes
+        settings_dual_types: effectiveIncludeDualTypes,
+        settings_daily_mode: settings.dailyMode,
       })
     }
 
@@ -174,7 +182,12 @@ function App() {
 
   return (
     <>
-      <Header mode={settings.mode} dailyDate={settings.dailyDate} onSettingsClick={toggleSettings} />
+      <Header
+        mode={settings.mode}
+        dailyDate={settings.dailyDate}
+        dailyMode={settings.dailyMode}
+        onSettingsClick={toggleSettings}
+      />
 
       {settingsOpen && (
         <SettingsPanel
@@ -190,8 +203,7 @@ function App() {
         <ScoreView
           answersCorrectCount={answersCorrectCount}
           questionsAnsweredCount={questionsAnsweredCount}
-          mode={settings.mode}
-          includeDualTypes={settings.includeDualTypes}
+          settings={settings}
           answerHistory={answerHistory}
           onTryMode={onTryMode}
         />

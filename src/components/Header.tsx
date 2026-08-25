@@ -1,25 +1,26 @@
-import type { Mode } from '../Settings';
+import type { Mode, DailyMode } from '../Settings';
 
 const modeDisplayName: Record<Mode, string> = {
-  daily: 'Daily Test',
-  random: 'Random Test',
+  daily: 'Daily Quiz',
+  random: 'Random Quiz',
 };
 
 type HeaderProps = {
   mode: Mode;
   dailyDate: string;
+  dailyMode: DailyMode;
   onSettingsClick: () => void;
 };
 
-export function Header({ mode, dailyDate, onSettingsClick }: HeaderProps) {
+export function Header({ mode, dailyDate, dailyMode, onSettingsClick }: HeaderProps) {
   const dailyLabel = mode === 'daily'
-    ? ' ' + new Date(dailyDate + 'T00:00:00').toLocaleDateString()
+    ? ` · ${dailyMode === 'pro' ? 'Pro' : 'Simple'} · ${new Date(dailyDate + 'T00:00:00').toLocaleDateString()}`
     : '';
   return (
     <header className="app-header">
       <h1 className="app-title">Pokémon Matchup Quiz</h1>
       <p className="app-subtitle">Guess the damage multiplier for each type matchup</p>
-      <span className="mode-badge">
+      <span className="mode-badge" onClick={onSettingsClick}>
         {modeDisplayName[mode] + dailyLabel}
       </span>
       <button className="settings-trigger" onClick={onSettingsClick} aria-label="Settings">

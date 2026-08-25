@@ -727,16 +727,17 @@ function mulberry32(seed: number): () => number {
     };
 }
 
-export function getDailyMatchups(count: number, date?: string): Matchup[] {
+export function getDailyMatchups(count: number, date?: string, isPro: boolean = false): Matchup[] {
     const d = date ? new Date(date + 'T00:00:00') : new Date();
-    const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    let seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    if (isPro) seed += 1_000_000;
     const rng = mulberry32(seed);
     const types = Object.keys(typeDetailList) as PokemonTypeName[];
     const matchups: Matchup[] = [];
 
     for (let i = 0; i < count; i++) {
         const attacking = types[Math.floor(rng() * types.length)];
-        const defendingCount = Math.floor(rng() * 2) + 1;
+        const defendingCount = isPro ? Math.floor(rng() * 2) + 1 : 1;
         const defending: PokemonTypeName[] = [];
         while (defending.length < defendingCount) {
             const candidate = types[Math.floor(rng() * types.length)];

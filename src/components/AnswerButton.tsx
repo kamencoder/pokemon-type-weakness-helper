@@ -1,5 +1,4 @@
 import { getEffectivenessColor, type EffectivenessModifier, type EffectivenessLevelDetail } from '../data/weaknesses';
-import type { Settings } from '../Settings';
 
 type AnswerButtonProps = {
   effectivenessDetail: EffectivenessLevelDetail;

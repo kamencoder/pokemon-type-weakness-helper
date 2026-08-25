@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
-import type { Mode } from '../Settings';
+import type { Mode, DailyMode, Settings } from '../Settings';
 import smileImg from '../assets/results/smile.svg';
 import neutralImg from '../assets/results/neutral.svg';
 import frownImg from '../assets/results/frown.svg';
 import cryImg from '../assets/results/cry.svg';
+import { loadDailyResult } from '../storage';
 
 
 export type AnswerRecord = {
@@ -18,27 +19,15 @@ export type AnswerRecord = {
 type ScoreViewProps = {
   answersCorrectCount: number;
   questionsAnsweredCount: number;
-  mode: Mode;
-  includeDualTypes: boolean;
+  settings: Settings;
   answerHistory: AnswerRecord[];
-  onTryMode: (mode: Mode) => void;
-};
-
-const nextMode: Partial<Record<Mode, Mode>> = {
-  daily: 'random',
-  random: 'random', // "random" mode can be repeated indefinitely, so it points to itself
-};
-
-const modeLabel: Record<Mode, string> = {
-  daily: 'Daily',
-  random: 'Random',
+  onTryMode: (mode: Mode, dailyMode?: DailyMode) => void;
 };
 
 export function ScoreView({
   answersCorrectCount,
   questionsAnsweredCount,
-  mode,
-  includeDualTypes,
+  settings,
   answerHistory,
   onTryMode,
 }: ScoreViewProps) {
@@ -46,7 +35,7 @@ export function ScoreView({
     const scorePercentage = questionsAnsweredCount
       ? Math.round(answersCorrectCount / questionsAnsweredCount * 100)
       : 0;
-  
+
     const scoreText = useMemo(() => {
       if (scorePercentage >= 90) return "Outstanding!";
       if (scorePercentage >= 80) return "Great job!";
@@ -54,14 +43,14 @@ export function ScoreView({
       if (scorePercentage >= 60) return "Keep practicing!";
       return "Better luck next time";
     }, [scorePercentage]);
-  
+
     const scoreImage = useMemo(() => {
       if (scorePercentage >= 80) return smileImg;
       if (scorePercentage >= 60) return neutralImg;
       if (scorePercentage >= 40) return frownImg;
       return cryImg;
     }, [scorePercentage]);
-  
+
     const scoreColor = useMemo(() => {
       if (scorePercentage >= 90) return '#48c78e';
       if (scorePercentage >= 80) return '#5b8af0';
@@ -70,18 +59,20 @@ export function ScoreView({
       return '#f14668';
     }, [scorePercentage]);
 
-  const next = nextMode[mode];
-  const nextModeLabel = useMemo(() => { 
-    
-    if (next === 'random') {
-      
-      if (next === mode) {
-        'Try another'
-      }
-      return 'Try a random test';
-    }
-    return `Try ${modeLabel[next!]}`;
-  }, [next]);
+
+  // Check whether the Pro daily has already been completed (used for the "Try Pro Mode" prompt).
+  const proAlreadyDone = useMemo(() => {
+    return loadDailyResult(settings.dailyDate, 'pro') !== null;
+  }, [settings.mode, settings.dailyDate]);
+
+  const simpleAlreadyDone= useMemo(() => {
+    return loadDailyResult(settings.dailyDate, 'simple') !== null;
+  }, [settings.mode, settings.dailyDate]);
+
+  const showTryProButton = !proAlreadyDone;
+  const showTrySimpleButton = !simpleAlreadyDone;
+  
+  const showRandomButton = !showTrySimpleButton || !showTryProButton; // Make sure we only show two buttons  
 
   return (
     <div className="score-view">
@@ -127,20 +118,34 @@ export function ScoreView({
           </div>
         </details>
       )}
-      {next && (
-        <button className="primary-button" onClick={() => onTryMode(next)}>
-          {nextModeLabel}
-        </button>
-      )}
-     
-      {mode === 'daily' && (
+      <div className="try-another-section">
+        <p className="try-another-header">Try another</p>
+        <div className="try-another-buttons">
+          {showTrySimpleButton && (
+            <button className="primary-button" onClick={() => onTryMode('daily', 'simple')}>
+              Simple Daily
+            </button>
+          )}
+          {showTryProButton && (
+            <button className="primary-button" onClick={() => onTryMode('daily', 'pro')}>
+              Pro Daily
+            </button>
+          )}
+          {showRandomButton && (
+            <button className="primary-button" onClick={() => onTryMode('random')}>
+              Random
+            </button>
+          )}
+        </div>
+      </div>
+      {settings.mode === 'daily' && (
         <p className="score-did-you-know">Come back tomorrow for a new daily challenge!</p>
       )}
-      
+
       <p className="score-did-you-know">
         Did you know? There are{' '}
-        <strong>{includeDualTypes ? '3,078' : '324'}</strong>{' '}
-        possible type matchups{includeDualTypes ? ' when including both single and dual type pokemon' : ' for single type pokemon'}.
+        <strong>{settings.includeDualTypes ? '3,078' : '324'}</strong>{' '}
+        possible type matchups{settings.includeDualTypes ? ' when including both single and dual type pokemon' : ' for single type pokemon'}.
 
         {/* There are 171 total possible unique type combinations (18 single-type options plus 153 dual-type pairs). Of those, only 9 dual-type combinations are not represented by an existing pokemon.*/}
       </p>
