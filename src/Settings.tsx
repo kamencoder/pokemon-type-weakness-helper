@@ -10,11 +10,11 @@ export type Settings = {
 }
 
 export const defaultSettings: Settings = {
-    numberOfQuestions: 20,
-    includeDualTypes: true,
     mode: 'daily',
     dailyDate: new Date().toISOString().slice(0, 10),
     dailyMode: 'simple',
+    includeDualTypes: false,
+    numberOfQuestions: 20,
 }
 
 function getLastDailyMode(): DailyMode {
@@ -52,11 +52,6 @@ export function getInitialSettings(): Settings {
     const dailyDate = get('dailyDate');
     if (dailyDate && /^\d{4}-\d{2}-\d{2}$/.test(dailyDate) && !isNaN(Date.parse(dailyDate))) {
         result.dailyDate = dailyDate;
-    }
-    if (!result.dailyDate)
-    {
-        // If date is not set in URL, default to today
-        result.dailyDate = (new Date()).toISOString().slice(0, 10)
     }
 
     const dailyMode = get('dailyMode');

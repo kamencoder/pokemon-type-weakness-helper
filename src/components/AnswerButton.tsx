@@ -37,12 +37,15 @@ export function AnswerButton({
     }
   }
 
+  const label = effectivenessDetail.description;
+
   return (
     <button
       className={`answer-button ${stateClass} ${!includeDualTypes ? 'easymode' : ''}`}
       style={{ backgroundColor: getEffectivenessColor(value) }}
       onClick={() => onAnswer(value)}
       disabled={showResults}
+      aria-label={label}
     >
       {includeDualTypes ? buttonText : easyButtonText}
     </button>

@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
 import posthog from 'posthog-js'
 import './App.css'
 import { effectivenessDetails, evaluateMatchup, getExpectedScorePercentage, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
@@ -43,11 +43,31 @@ function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>(storedInitial?.answerHistory ?? []);
 
+  // Track what had focus before a modal opened so we can restore it on close
+  const lastSettingsFocusRef = useRef<HTMLElement | null>(null);
+  const lastHelpFocusRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (showResults) {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
   }, [showResults]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (settingsOpen) {
+        setPendingSettings(settings);
+        setSettingsOpen(false);
+        setTimeout(() => lastSettingsFocusRef.current?.focus(), 0);
+      } else if (showHelp) {
+        setShowHelp(false);
+        setTimeout(() => lastHelpFocusRef.current?.focus(), 0);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [settingsOpen, showHelp, settings]);
 
   const currentMatchup = matchupQueue[currentIndex];
   const totalQuestions = matchupQueue.length;
@@ -94,6 +114,9 @@ function App() {
   };
 
   const toggleSettings = () => {
+    if (!settingsOpen) {
+      lastSettingsFocusRef.current = document.activeElement as HTMLElement;
+    }
     setPendingSettings(settings);
     setSettingsOpen(s => !s);
   };
@@ -101,12 +124,24 @@ function App() {
   const cancelSettings = () => {
     setPendingSettings(settings);
     setSettingsOpen(false);
+    setTimeout(() => lastSettingsFocusRef.current?.focus(), 0);
   };
 
   const saveSettings = () => {
     setSettings(pendingSettings);
     setSettingsOpen(false);
     resetQuiz(pendingSettings);
+    setTimeout(() => lastSettingsFocusRef.current?.focus(), 0);
+  };
+
+  const openHelp = () => {
+    lastHelpFocusRef.current = document.activeElement as HTMLElement;
+    setShowHelp(true);
+  };
+
+  const closeHelp = () => {
+    setShowHelp(false);
+    setTimeout(() => lastHelpFocusRef.current?.focus(), 0);
   };
 
   const onNewMatchupClick = () => {
@@ -182,6 +217,7 @@ function App() {
 
   return (
     <>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <Header
         mode={settings.mode}
         dailyDate={settings.dailyDate}
@@ -199,6 +235,7 @@ function App() {
         />
       )}
 
+      <main id="main-content">
       {viewScore ? (
         <ScoreView
           answersCorrectCount={answersCorrectCount}
@@ -224,17 +261,19 @@ function App() {
                   <div className="question-text">What is the damage multiplier for the attack?</div>
                   <button
                     className={`help-trigger${showHelp ? ' active' : ''}`}
-                    onClick={() => setShowHelp(h => !h)}
+                    onClick={showHelp ? closeHelp : openHelp}
                     aria-label="Explain multipliers"
+                    aria-expanded={showHelp}
+                    aria-controls="help-panel"
                   >
-                    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                       <circle cx="10" cy="10" r="9"/>
                       <text x="10" y="14" textAnchor="middle" fontSize="11" fontWeight="700" stroke="none" fill="currentColor">?</text>
                     </svg>
                   </button>
                 </div>
 
-                {showHelp && <HelpPanel onClose={() => setShowHelp(false)} />}
+                {showHelp && <HelpPanel id="help-panel" onClose={closeHelp} settings={settings}/>}
 
                 <div className="answer-buttons">
                   {[0.25, 0.5, 1, 2, 4].map(value => (
@@ -278,6 +317,7 @@ function App() {
           </div>
         </>
       )}
+      </main>
     </>
   );
 }

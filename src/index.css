@@ -66,3 +66,49 @@ button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Screen-reader-only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip navigation link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: white;
+  z-index: 9999;
+  font-weight: 700;
+  outline: none;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -701,15 +701,66 @@ export type EffectivenessLevelDetail = {
     description: string;
     helpTitle: string;
     helpText: string;
+    helpTextSimple?: string;
     color: string;
 }
 export const effectivenessDetails: { [key in EffectivenessModifier]: EffectivenessLevelDetail } = {
-    0: { value: 0, buttonText: '0x', easyButtonText: 'Immune', description: 'No Effect (x0)', helpTitle: 'Immune', helpText: 'Takes no damage because the one of the types of the defending pokemon is entirely immune to damage from the attack type.', color: '#888' },
-    0.25: { value: 0.25, buttonText: '0.25x', easyButtonText: undefined, description: 'Extremely Ineffective (1⁄4)', helpTitle: 'Extremely Ineffective', helpText: 'Defending pokemon takes ¼ damage because BOTH of the defending types are resistant to the attacking type.', color: '#FFD93B' },
-    0.5: { value: 0.5, buttonText: '0.5x', easyButtonText: 'Not effective', description: 'Not Very Effective (1⁄2)', helpTitle: 'Not Very Effective', helpText: 'Defending pokemon takes ½ damage because one of the defending types are resistant.', color: '#FFA531' },
-    1: { value: 1, buttonText: '1x', easyButtonText: 'Regular damage', description: 'Normal Effectiveness (x1)', helpTitle: 'Neutral', helpText: 'Defending pokemon takes normal damage. Usually this is because the defending types have no particular weakness or resistance to the attacking type. It can also happen when the defending pokemon has one type that is weak to the attack type and another type that is resistent. In that case they negate each other (0.5 x 2 = 1).', color: '#FF6B1A' },
-    2: { value: 2, buttonText: '2x', easyButtonText: 'Super effective', description: 'Super Effective (2x)', helpTitle: 'Super Effective', helpText: 'Defending pokemon takes double damage because one of the defending types are weak to the attacking type.', color: '#E63946' },
-    4: { value: 4, buttonText: '4x', easyButtonText: undefined, description: 'Extremely Effective (4x)', helpTitle: 'Extremely Effective', helpText: 'Defending pokemon takes quadrupal damage because BOTH of the defending types are very weak to the attacking type.', color: '#dd539fff' },
+    0: { 
+        value: 0, 
+        buttonText: '0x', 
+        easyButtonText: 'Immune', 
+        description: 'No Effect (x0)', 
+        helpTitle: 'Immune', 
+        helpText: 'Takes no damage because the one of the types of the defending pokemon is entirely immune to damage from the attack type.', 
+        color: '#888' 
+    },
+    0.25: { 
+        value: 0.25, 
+        buttonText: '0.25x', 
+        easyButtonText: undefined, 
+        description: 'Extremely Ineffective (1⁄4)', 
+        helpTitle: 'Extremely Ineffective', 
+        helpText: 'Defending pokemon takes ¼ damage because BOTH of the defending types are resistant to the attacking type.', 
+        color: '#FFD93B' },
+    0.5: { 
+        value: 0.5, 
+        buttonText: '0.5x', 
+        easyButtonText: 'Not effective', 
+        description: 'Not Very Effective (1⁄2)', 
+        helpTitle: 'Not Very Effective', 
+        helpText: 'Defending pokemon takes ½ damage because one of the defending types are resistant.', 
+        helpTextSimple: 'Defending pokemon takes ½ damage because they are resistant to that attack type.',
+        color: '#FFA531' 
+    },
+    1: { 
+        value: 1, 
+        buttonText: '1x', 
+        easyButtonText: 'Regular damage', 
+        description: 'Normal Effectiveness (x1)', 
+        helpTitle: 'Regular', 
+        helpText: 'Defending pokemon takes normal damage. Usually this is because the defending types have no particular weakness or resistance to the attacking type. It can also happen when the defending pokemon has one type that is weak to the attack type and another type that is resistent. In that case they negate each other (0.5 x 2 = 1).', 
+        helpTextSimple: 'Defending pokemon takes normal damage from the attack',
+        color: '#FF6B1A' 
+    },
+    2: { 
+        value: 2, 
+        buttonText: '2x', 
+        easyButtonText: 'Super effective', 
+        description: 'Super Effective (2x)', 
+        helpTitle: 'Super Effective', 
+        helpText: 'Defending pokemon takes double damage because one of the defending types are weak to the attacking type.', 
+        helpTextSimple: 'Defending pokemon takes double damage because they are weak to the attack type.',
+        color: '#E63946' 
+    },
+    4: { 
+        value: 4, 
+        buttonText: '4x', 
+        easyButtonText: undefined, 
+        description: 'Extremely Effective (4x)', 
+        helpTitle: 'Extremely Effective', 
+        helpText: 'Defending pokemon takes quadrupal damage because BOTH of the defending types are very weak to the attacking type.', 
+        color: '#dd539fff' 
+    },
 };
 
 export const effectivenessValues: EffectivenessModifier[] = [0, 0.25, 0.5, 1, 2, 4];

@@ -76,24 +76,28 @@ export function ScoreView({
 
   return (
     <div className="score-view">
+      {/* Announced to screen readers when the score view renders */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        Quiz complete. You scored {answersCorrectCount} out of {questionsAnsweredCount}, {scorePercentage} percent. {scoreText}
+      </div>
       <div className="score-hero">
-        <img src={scoreImage} className="score-image" alt="" />
-        <div className="score-percentage" style={{ color: scoreColor }}>{scorePercentage}%</div>
+        <img src={scoreImage} className="score-image" alt="" aria-hidden="true" />
+        <div className="score-percentage" style={{ color: scoreColor }} aria-hidden="true">{scorePercentage}%</div>
       </div>
       <div className="score-tier-text">{scoreText}</div>
-      <div className="score-detail">{answersCorrectCount} / {questionsAnsweredCount} correct</div>
+      {/* <div className="score-detail">{answersCorrectCount} / {questionsAnsweredCount} correct</div> */}
        {answerHistory.length > 0 && (
         <details className="answer-review">
           <summary className="answer-review-toggle">
-            Review Answers
-            <svg className="answer-review-chevron" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <span>{answersCorrectCount} / {questionsAnsweredCount} correct</span>
+            <svg className="answer-review-chevron" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polyline points="5 8 10 13 15 8" />
             </svg>
           </summary>
           <div className="answer-review-list">
             {answerHistory.map((record, i) => (
               <div key={i} className={`answer-review-row ${record.correct ? 'correct' : 'incorrect'}`}>
-                <div className="answer-review-icon">{record.correct ? '✓' : '✗'}</div>
+                <div className="answer-review-icon" aria-hidden="true">{record.correct ? '✓' : '✗'}</div>
                 <div className="answer-review-content">
                   <div className="answer-review-matchup">
                     <span className="answer-review-num">Q{record.questionNumber}</span>
