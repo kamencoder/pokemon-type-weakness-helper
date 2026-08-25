@@ -273,7 +273,7 @@ function App() {
             {currentMatchup ? (
               <>
                 <div className="question-row">
-                  <div className="question-text">What is the damage multiplier for the attack?</div>
+                  <div className="question-text">What is the {settings.includeDualTypes ? "damage multiplier for" : "effectiveness of"} the attack?</div>
                   <button
                     className={`help-trigger${showHelp ? ' active' : ''}`}
                     onClick={showHelp ? closeHelp : openHelp}
