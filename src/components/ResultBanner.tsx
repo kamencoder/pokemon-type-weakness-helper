@@ -16,13 +16,14 @@ export function ResultBanner({
   onViewScore,
 }: ResultBannerProps) {
   return (
-    <div className="result-row">
+    <div className="result-row" role="alert">
       <div className={`result-banner ${lastAnswerCorrect ? 'correct' : 'incorrect'}`}>
-        <div className={`result-icon ${lastAnswerCorrect ? 'correct' : 'incorrect'}`}>
+        <div className={`result-icon ${lastAnswerCorrect ? 'correct' : 'incorrect'}`} aria-hidden="true">
           {lastAnswerCorrect ? '✓' : '✗'}
         </div>
         <div className="result-details">
           <div className="result-effectiveness" style={{ color: 'white' }}>
+            <span className="sr-only">{lastAnswerCorrect ? 'Correct! ' : 'Incorrect. '}</span>
             It's {totalEffectivenessDescription}
           </div>
           {resultsBreakdown && (
@@ -35,7 +36,7 @@ export function ResultBanner({
                 rel="noopener noreferrer"
                 aria-label="Verify on PokemonDB"
               >
-                <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                   <circle cx="10" cy="10" r="9"/>
                   <text x="10" y="14" textAnchor="middle" fontSize="11" fontWeight="700" stroke="none" fill="currentColor">?</text>
                 </svg>
@@ -46,12 +47,12 @@ export function ResultBanner({
       </div>
       {!finished ? (
         <button className="next-button" onClick={onNext}>
-          <span className="next-arrow">▶</span>
+          <span aria-hidden="true">▶</span>
           <span>Next</span>
         </button>
       ) : (
         <button className="next-button" onClick={onViewScore}>
-          <span className="next-arrow">✓</span>
+          <span aria-hidden="true">✓</span>
           <span>Score</span>
         </button>
       )}
