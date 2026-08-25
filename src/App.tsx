@@ -4,7 +4,7 @@ import './App.css'
 import { effectivenessDetails, evaluateMatchup, getExpectedScorePercentage, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
 import { getDailyMatchups } from './data/weaknesses';
 import { getInitialSettings, type Settings, type Mode, type DailyMode } from './Settings';
-import { saveDailyResult, loadDailyResult } from './storage';
+import { saveDailyResult, loadDailyResult, getPreferredDailyMode, savePreferredDailyMode } from './storage';
 
 import { Header } from './components/Header';
 import { SettingsPanel } from './components/SettingsPanel';
@@ -14,6 +14,7 @@ import { AnswerButton } from './components/AnswerButton';
 import { HelpPanel } from './components/HelpPanel';
 import { ResultBanner } from './components/ResultBanner';
 import { ScoreView, type AnswerRecord } from './components/ScoreView';
+import { WelcomeModeModal } from './components/WelcomeModeModal';
 
 const DAILY_QUESTION_COUNT = 20;
 
@@ -42,6 +43,7 @@ function App() {
   const [viewScore, setViewScore] = useState(storedInitial != null);
   const [showHelp, setShowHelp] = useState(false);
   const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>(storedInitial?.answerHistory ?? []);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(() => getPreferredDailyMode() === null);
 
   // Track what had focus before a modal opened so we can restore it on close
   const lastSettingsFocusRef = useRef<HTMLElement | null>(null);
@@ -151,6 +153,15 @@ function App() {
     setCurrentIndex(i => i + 1);
   };
 
+  const handleWelcomeSelect = (dailyMode: DailyMode) => {
+    savePreferredDailyMode(dailyMode);
+    setShowWelcomeModal(false);
+    const newSettings = { ...settings, dailyMode };
+    setSettings(newSettings);
+    setPendingSettings(newSettings);
+    resetQuiz(newSettings);
+  };
+
   const onTryMode = (mode: Mode, dailyMode?: DailyMode) => {
     const newSettings = { ...settings, mode };
     if (dailyMode){
@@ -187,6 +198,7 @@ function App() {
         total: matchupQueue.length,
         answerHistory: newHistory,
       });
+      savePreferredDailyMode(settings.dailyMode);
 
       const finalCorrect = answersCorrectCount + (correct ? 1 : 0);
       const finalTotal = questionsAnsweredCount + 1;
@@ -218,6 +230,9 @@ function App() {
   return (
     <>
       <a href="#main-content" className="skip-link">Skip to main content</a>
+
+      {showWelcomeModal && <WelcomeModeModal onSelect={handleWelcomeSelect} />}
+
       <Header
         mode={settings.mode}
         dailyDate={settings.dailyDate}

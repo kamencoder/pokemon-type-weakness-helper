@@ -12,15 +12,18 @@ export type Settings = {
 export const defaultSettings: Settings = {
     mode: 'daily',
     dailyDate: new Date().toISOString().slice(0, 10),
-    dailyMode: 'simple',
-    includeDualTypes: false,
+    dailyMode: 'pro',
+    includeDualTypes: true,
     numberOfQuestions: 20,
 }
 
 function getLastDailyMode(): DailyMode {
     try {
-        const stored = localStorage.getItem('last-daily-mode');
-        if (stored === 'pro') return 'pro';
+        const preferred = localStorage.getItem('preferredDailyMode');
+        if (preferred === 'pro') return 'pro';
+        if (preferred === 'simple') return 'simple';
+        const last = localStorage.getItem('last-daily-mode');
+        if (last === 'pro') return 'pro';
     } catch {}
     return 'simple';
 }

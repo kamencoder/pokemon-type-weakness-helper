@@ -14,7 +14,7 @@ type HeaderProps = {
 
 export function Header({ mode, dailyDate, dailyMode, onSettingsClick }: HeaderProps) {
   const dailyLabel = mode === 'daily'
-    ? ` · ${dailyMode === 'pro' ? 'Pro' : 'Simple'} · ${new Date(dailyDate + 'T00:00:00').toLocaleDateString()}`
+    ? ` · ${dailyMode === 'pro' ? 'Pro' : 'Basic'} · ${new Date(dailyDate + 'T00:00:00').toLocaleDateString()}`
     : '';
   const modeText = modeDisplayName[mode] + dailyLabel;
   return (

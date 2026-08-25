@@ -127,7 +127,7 @@ export function ScoreView({
         <div className="try-another-buttons">
           {showTrySimpleButton && (
             <button className="primary-button" onClick={() => onTryMode('daily', 'simple')}>
-              Simple Daily
+              Basic Daily
             </button>
           )}
           {showTryProButton && (

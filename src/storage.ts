@@ -18,6 +18,21 @@ export function saveDailyResult(date: string, dailyMode: DailyMode, result: Dail
   }
 }
 
+export function getPreferredDailyMode(): DailyMode | null {
+  try {
+    const stored = localStorage.getItem('preferredDailyMode');
+    if (stored === 'pro') return 'pro';
+    if (stored === 'simple') return 'simple';
+  } catch {}
+  return null;
+}
+
+export function savePreferredDailyMode(mode: DailyMode): void {
+  try {
+    localStorage.setItem('preferredDailyMode', mode);
+  } catch {}
+}
+
 export function loadDailyResult(date: string, dailyMode: DailyMode): DailyResult | null {
   try {
     const raw = localStorage.getItem(key(date, dailyMode));

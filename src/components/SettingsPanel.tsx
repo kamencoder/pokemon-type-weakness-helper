@@ -15,7 +15,7 @@ const visibleModes: { mode: Mode; label: string }[] = [
 ];
 
 const dailyModes: { dailyMode: DailyMode; label: string }[] = [
-  { dailyMode: 'simple', label: 'Simple' },
+  { dailyMode: 'simple', label: 'Basic' },
   { dailyMode: 'pro', label: 'Pro' },
 ];
 
