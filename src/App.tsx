@@ -283,7 +283,7 @@ function App() {
                   </button>
                 </div>
 
-                {showHelp && <HelpPanel id="help-panel" onClose={closeHelp} settings={settings}/>}
+                {showHelp && <HelpPanel id="help-panel" onClose={closeHelp} includeDualTypes={effectiveIncludeDualTypes}/>}
 
                 <div className="answer-buttons">
                   {[0.25, 0.5, 1, 2, 4].map(value => (

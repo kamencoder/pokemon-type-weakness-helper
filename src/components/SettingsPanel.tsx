@@ -74,7 +74,7 @@ export function SettingsPanel({
             type="date"
             className="settings-date"
             value={pendingSettings.dailyDate}
-            max={new Date().toISOString().slice(0, 10)}
+            max={new Date(Date.now() + 86400000).toISOString().slice(0, 10)} // One day in the future so they can take tomorrow's quiz early.
             onKeyDown={() => false}
             onClick={e => {(e.target as any)?.showPicker()}}
             onChange={e => setPendingSettings(s => ({ ...s, dailyDate: e.target.value }))}

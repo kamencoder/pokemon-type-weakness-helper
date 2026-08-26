@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { effectivenessValueDetailList, getEffectivenessColor } from '../data/weaknesses';
-import type { Settings } from '../Settings';
 
 type HelpPanelProps = {
   id?: string;
-  settings: Settings;
+  includeDualTypes: boolean;
   onClose: () => void;
 };
 
@@ -25,7 +24,7 @@ function trapFocus(e: React.KeyboardEvent<HTMLDivElement>) {
   }
 }
 
-export function HelpPanel({ id, onClose, settings }: HelpPanelProps) {
+export function HelpPanel({ id, onClose, includeDualTypes }: HelpPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,11 +45,11 @@ export function HelpPanel({ id, onClose, settings }: HelpPanelProps) {
       <button className="help-close" onClick={onClose} aria-label="Close help">✕</button>
       {effectivenessValueDetailList.map(detail => 
       {
-        if (!settings.includeDualTypes && (detail.value === 0.25 || detail.value === 4)){
+        if (!includeDualTypes && (detail.value === 0.25 || detail.value === 4)){
           return null;
         }
 
-        const helpText = settings.includeDualTypes ? detail.helpText : (detail.helpTextSimple || detail.helpText)
+        const helpText = includeDualTypes ? detail.helpText : (detail.helpTextSimple || detail.helpText)
         return  (
         <div key={detail.value} className="help-row">
           <div className="help-badge" style={{ backgroundColor: getEffectivenessColor(detail.value) }}>
