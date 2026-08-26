@@ -57,19 +57,14 @@ function App() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      if (settingsOpen) {
-        setPendingSettings(settings);
-        setSettingsOpen(false);
-        setTimeout(() => lastSettingsFocusRef.current?.focus(), 0);
-      } else if (showHelp) {
+      if (e.key === 'Escape' && showHelp) {
         setShowHelp(false);
         setTimeout(() => lastHelpFocusRef.current?.focus(), 0);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [settingsOpen, showHelp, settings]);
+  }, [showHelp]);
 
   const currentMatchup = matchupQueue[currentIndex];
   const totalQuestions = matchupQueue.length;

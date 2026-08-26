@@ -725,7 +725,7 @@ export const effectivenessDetails: { [key in EffectivenessModifier]: Effectivene
     0.5: { 
         value: 0.5, 
         buttonText: '0.5x', 
-        easyButtonText: 'Not effective', 
+        easyButtonText: 'Not very effective', 
         description: 'Not Very Effective (1⁄2)', 
         helpTitle: 'Not Very Effective', 
         helpText: 'Defending pokemon takes ½ damage because one of the defending types are resistant.', 

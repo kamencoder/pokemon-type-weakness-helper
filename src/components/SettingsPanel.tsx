@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { Modal } from './Modal';
 import type { Settings, Mode, DailyMode } from '../Settings';
 
 type SettingsPanelProps = {
@@ -19,23 +19,6 @@ const dailyModes: { dailyMode: DailyMode; label: string }[] = [
   { dailyMode: 'pro', label: 'Pro' },
 ];
 
-function trapFocus(e: React.KeyboardEvent<HTMLDivElement>) {
-  if (e.key !== 'Tab') return;
-  const focusable = e.currentTarget.querySelectorAll<HTMLElement>(
-    'button:not([disabled]), input:not([disabled]), a[href], select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-  );
-  if (!focusable.length) return;
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  if (e.shiftKey && document.activeElement === first) {
-    e.preventDefault();
-    last.focus();
-  } else if (!e.shiftKey && document.activeElement === last) {
-    e.preventDefault();
-    first.focus();
-  }
-}
-
 export function SettingsPanel({
   pendingSettings,
   setPendingSettings,
@@ -43,21 +26,8 @@ export function SettingsPanel({
   onCancel,
   onSave,
 }: SettingsPanelProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    panelRef.current?.querySelector<HTMLElement>('button')?.focus();
-  }, []);
-
   return (
-    <div
-      className="settings-panel"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="settings-panel-title"
-      ref={panelRef}
-      onKeyDown={trapFocus}
-    >
+    <Modal labelledBy="settings-panel-title" onEscape={onCancel} className="settings-panel">
       <p className="settings-panel-header" id="settings-panel-title">Settings</p>
       <button className="settings-close" onClick={onCancel} aria-label="Close settings">✕</button>
 
@@ -157,6 +127,6 @@ export function SettingsPanel({
           <button className="settings-save" onClick={onSave}>Save & Restart</button>
         </div>
       )}
-    </div>
+    </Modal>
   );
 }
