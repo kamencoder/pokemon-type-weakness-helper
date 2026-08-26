@@ -89,7 +89,7 @@ export const MatchupAnecdotes = {
   ElectricAndGrass: "Plants thrive after thunder storms so they enjoy it (x0.5), but plants don't do extra damage to electricity (x1).",
   ElectricAndGround: "Electricity is nullified by Grounding it (x0) and Ground kills the charge (x2).",
   ElectricAndFlying: "Lightning strikes the flying bird.",
-  ElectricAndRock: "Should rocks be resistent to electricity like ground? You'd think so, but they aren't. I don't know what to tell you. This is a rock-hard match-up.",
+  ElectricAndRock: "Should rocks be resistant to electricity like ground? You'd think so, but they aren't. I don't know what to tell you. This is a rock-hard match-up.",
   ElectricAndElectric: "Electricity plus electricity equals more electricity (x0.5 both ways).",
   ElectricAndSteel: "Metal and electricity normally go well together so they aren't strong against each other, but electricity is more likely to overload a machine (x1) compared to metal causing any trouble for electricity (x0.5).",
   GrassAndGrass: "Trees don't wage war on each other (x0.5 both ways).",
@@ -739,7 +739,7 @@ export const effectivenessDetails: { [key in EffectivenessModifier]: Effectivene
         easyButtonText: 'Regular damage', 
         description: 'Normal Effectiveness (x1)', 
         helpTitle: 'Regular', 
-        helpText: 'Defending pokemon takes normal damage. Usually this is because the defending types have no particular weakness or resistance to the attacking type. It can also happen when the defending pokemon has one type that is weak to the attack type and another type that is resistent. In that case they negate each other (0.5 x 2 = 1) resulting in normal damage.', 
+        helpText: 'Defending pokemon takes normal damage. Usually this is because the defending types have no particular weakness or resistance to the attacking type. It can also happen when the defending pokemon has one type that is weak to the attack type and another type that is resistant. In that case they negate each other (0.5 x 2 = 1) resulting in normal damage.', 
         helpTextSimple: 'Defending pokemon takes normal damage from the attack because it is not resistant or weak to that attack type.',
         color: '#FF6B1A' 
     },
