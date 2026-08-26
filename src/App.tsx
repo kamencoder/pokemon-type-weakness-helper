@@ -151,7 +151,8 @@ function App() {
   const handleWelcomeSelect = (dailyMode: DailyMode) => {
     savePreferredDailyMode(dailyMode);
     setShowWelcomeModal(false);
-    const newSettings = { ...settings, dailyMode };
+    const includeDualTypes = dailyMode === 'pro' ? true : false;
+    const newSettings = { ...settings, dailyMode, includeDualTypes };
     setSettings(newSettings);
     setPendingSettings(newSettings);
     resetQuiz(newSettings);

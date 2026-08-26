@@ -142,10 +142,10 @@ export const MatchupAnecdotes = {
   SteelAndFairy: "In folklore, iron is used against the Fae.",
   SteelAndDragon: "Dragon claws skid off the knight's plate armor (x0.5), but it's still not easy work slaying a dragon (x1).",
   PsychicAndPsychic: "Two mind readers see each other coming (x0.5 both ways).",
-  PsychicAndBug: "Buzzing fly breaks psychic concentration (x2), but bugs can still be crushed with telekenisis (x1)",
-  PsychicAndGhost: "Ghosts scare and bewilder Psychics, breaking concentation (x2), but a psychic can still fight the dead just fine (x1).",
+  PsychicAndBug: "Buzzing fly breaks psychic concentration (x2), but bugs can still be crushed with telekinesis (x1)",
+  PsychicAndGhost: "Ghosts scare and bewilder Psychics, breaking concentration (x2), but a psychic can still fight the dead just fine (x1).",
   PsychicAndDark: "Psychics terrified of the unknown that lurks in the dark more than anything else. It's so bad that it's completely helpless against the darkness (x0) and the darkness destroys the mind (x2).",
-  GhostAndGhost: "Few things can hit a poultergeist harder than another poultergeist (x2 both ways).",
+  GhostAndGhost: "Few things can hit a poltergeist harder than another poltergeist (x2 both ways).",
   GhostAndDark: "A dark necromancer dominates the dead",
   GhostAndSteel: "Armor can't block what walks through walls, and a ghost gets no grip on cold steel (x1 both ways).",
   GhostAndFairy: "Fairy tales and ghost stories live on the same shelf. Neither one has the upper hand (x1 both ways).",
@@ -759,7 +759,7 @@ export const effectivenessDetails: { [key in EffectivenessModifier]: Effectivene
         easyButtonText: undefined, 
         description: 'Extremely Effective (4x)', 
         helpTitle: 'Extremely Effective', 
-        helpText: 'Defending pokemon takes quadrupal damage because BOTH of its types are weak to the attacking type.', 
+        helpText: 'Defending pokemon takes quadruple damage because BOTH of its types are weak to the attacking type.', 
         color: '#dd539fff' 
     },
 };
