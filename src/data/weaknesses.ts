@@ -786,8 +786,9 @@ export function getDailyMatchups(count: number, date?: string, isPro: boolean = 
     const rng = mulberry32(seed);
     const types = Object.keys(typeDetailList) as PokemonTypeName[];
     const matchups: Matchup[] = [];
+    const seen = new Set<string>();
 
-    for (let i = 0; i < count; i++) {
+    while (matchups.length < count) {
         const attacking = types[Math.floor(rng() * types.length)];
         const defendingCount = isPro ? Math.floor(rng() * 2) + 1 : 1;
         const defending: PokemonTypeName[] = [];
@@ -795,10 +796,14 @@ export function getDailyMatchups(count: number, date?: string, isPro: boolean = 
             const candidate = types[Math.floor(rng() * types.length)];
             if (!defending.includes(candidate)) defending.push(candidate);
         }
-        matchups.push({
-            attackingType: typeDetailList[attacking],
-            defendingTypes: defending.map(t => typeDetailList[t]),
-        });
+        const key = attacking + '|' + [...defending].sort().join(',');
+        if (!seen.has(key)) {
+            seen.add(key);
+            matchups.push({
+                attackingType: typeDetailList[attacking],
+                defendingTypes: defending.map(t => typeDetailList[t]),
+            });
+        }
     }
 
     return matchups;

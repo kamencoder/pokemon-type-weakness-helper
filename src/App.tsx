@@ -18,11 +18,24 @@ import { WelcomeModeModal } from './components/WelcomeModeModal';
 
 const DAILY_QUESTION_COUNT = 20;
 
+function matchupKey(m: Matchup): string {
+  return m.attackingType.name + '|' + m.defendingTypes.map(d => d.name).sort().join(',');
+}
+
 function buildMatchupQueue(s: Settings): Matchup[] {
   if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT, s.dailyDate, s.dailyMode === 'pro');
-  return Array.from({ length: s.numberOfQuestions }, () =>
-    getRandomMatchup(s.includeDualTypes ? 2 : 1)
-  );
+  const maxDefendingTypes = s.includeDualTypes ? 2 : 1;
+  const seen = new Set<string>();
+  const queue: Matchup[] = [];
+  while (queue.length < s.numberOfQuestions) {
+    const matchup = getRandomMatchup(maxDefendingTypes);
+    const key = matchupKey(matchup);
+    if (!seen.has(key)) {
+      seen.add(key);
+      queue.push(matchup);
+    }
+  }
+  return queue;
 }
 
 const initialSettings = getInitialSettings();
