@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState, useRef } from 'react'
 import posthog from 'posthog-js'
 import './App.css'
-import { effectivenessDetails, evaluateMatchup, getExpectedScorePercentage, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
+import { buildMatchupQueue, effectivenessDetails, evaluateMatchup, getExpectedScorePercentage, getRandomMatchup, type EffectivenessModifier, type Matchup } from './data/weaknesses';
 import { getDailyMatchups } from './data/weaknesses';
 import { getInitialSettings, type Settings, type Mode, type DailyMode } from './Settings';
 import { saveDailyResult, loadDailyResult, getPreferredDailyMode, savePreferredDailyMode } from './storage';
@@ -16,27 +16,6 @@ import { ResultBanner } from './components/ResultBanner';
 import { ScoreView, type AnswerRecord } from './components/ScoreView';
 import { WelcomeModeModal } from './components/WelcomeModeModal';
 
-const DAILY_QUESTION_COUNT = 20;
-
-function matchupKey(m: Matchup): string {
-  return m.attackingType.name + '|' + m.defendingTypes.map(d => d.name).sort().join(',');
-}
-
-function buildMatchupQueue(s: Settings): Matchup[] {
-  if (s.mode === 'daily') return getDailyMatchups(DAILY_QUESTION_COUNT, s.dailyDate, s.dailyMode === 'pro');
-  const maxDefendingTypes = s.includeDualTypes ? 2 : 1;
-  const seen = new Set<string>();
-  const queue: Matchup[] = [];
-  while (queue.length < s.numberOfQuestions) {
-    const matchup = getRandomMatchup(maxDefendingTypes);
-    const key = matchupKey(matchup);
-    if (!seen.has(key)) {
-      seen.add(key);
-      queue.push(matchup);
-    }
-  }
-  return queue;
-}
 
 const initialSettings = getInitialSettings();
 const storedInitial = initialSettings.mode === 'daily'

@@ -46,6 +46,7 @@ import PsychicTypeIcon from '../assets/type-icons/psychic.svg';
 import RockTypeIcon from '../assets/type-icons/rock.svg';
 import SteelTypeIcon from '../assets/type-icons/steel.svg';
 import WaterTypeIcon from '../assets/type-icons/water.svg';
+import type { Settings } from '../Settings';
 
 export type MatchupDifficulty =
     | 1  // Easy, most people know this.
@@ -637,23 +638,6 @@ export const getExpectedScorePercentage = (matchups: Matchup[]): number => {
     return expectedCorrectAnswers / matchups.length * 100;
 }
 
-export const getRandomMatchup = (maxDefendingTypes: number = 1): Matchup => {
-    const types = Object.keys(typeDetailList) as PokemonTypeName[];
-    const attackingType = types[Math.floor(Math.random() * types.length)];
-    const defendingTypesCount = Math.floor(Math.random() * maxDefendingTypes) + 1;
-    const defendingTypes: PokemonTypeName[] = [];
-    for (let i = 0; i < defendingTypesCount; i++) {
-        let rndDefendingType = types[Math.floor(Math.random() * types.length)];
-        while (defendingTypes.includes(rndDefendingType)) {
-            console.log('duplicate defending type found, re-rolling');
-            rndDefendingType = types[Math.floor(Math.random() * types.length)];
-        }
-        defendingTypes.push(rndDefendingType);
-    }
-
-    return { attackingType: typeDetailList[attackingType], defendingTypes: defendingTypes.map(dt => typeDetailList[dt]) };
-}
-
 export type MatchupResults = {
     totalEffectiveness: EffectivenessModifier;
     totalEffectivenessDescription: string;
@@ -779,6 +763,12 @@ function mulberry32(seed: number): () => number {
     };
 }
 
+function matchupKey(m: Matchup): string {
+  return m.attackingType.name + '|' + m.defendingTypes.map(d => d.name).sort().join(',');
+}
+
+const DAILY_QUESTION_COUNT = 20;
+
 export function getDailyMatchups(count: number, date?: string, isPro: boolean = false): Matchup[] {
     const d = date ? new Date(date + 'T00:00:00') : new Date();
     let seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
@@ -796,15 +786,57 @@ export function getDailyMatchups(count: number, date?: string, isPro: boolean = 
             const candidate = types[Math.floor(rng() * types.length)];
             if (!defending.includes(candidate)) defending.push(candidate);
         }
-        const key = attacking + '|' + [...defending].sort().join(',');
+        const newMatchup = {
+            attackingType: typeDetailList[attacking],
+            defendingTypes: defending.map(t => typeDetailList[t]),
+        };
+        const key = matchupKey(newMatchup);
         if (!seen.has(key)) {
             seen.add(key);
-            matchups.push({
-                attackingType: typeDetailList[attacking],
-                defendingTypes: defending.map(t => typeDetailList[t]),
-            });
+            matchups.push(newMatchup);
         }
     }
 
     return matchups;
+}
+
+export const getRandomMatchup = (maxDefendingTypes: number = 1): Matchup => {
+    const types = Object.keys(typeDetailList) as PokemonTypeName[];
+    const attackingType = types[Math.floor(Math.random() * types.length)];
+    const defendingTypesCount = Math.floor(Math.random() * maxDefendingTypes) + 1;
+    const defendingTypes: PokemonTypeName[] = [];
+    for (let i = 0; i < defendingTypesCount; i++) {
+        let rndDefendingType = types[Math.floor(Math.random() * types.length)];
+        while (defendingTypes.includes(rndDefendingType)) {
+            console.log('duplicate defending type found, re-rolling');
+            rndDefendingType = types[Math.floor(Math.random() * types.length)];
+        }
+        defendingTypes.push(rndDefendingType);
+    }
+
+    return { attackingType: typeDetailList[attackingType], defendingTypes: defendingTypes.map(dt => typeDetailList[dt]) };
+}
+
+function getRandomMatchups(s: Settings): Matchup[] {
+const maxDefendingTypes = s.includeDualTypes ? 2 : 1;
+  const seen = new Set<string>();
+  const queue: Matchup[] = [];
+  while (queue.length < s.numberOfQuestions) {
+    const matchup = getRandomMatchup(maxDefendingTypes);
+    const key = matchupKey(matchup);
+    if (!seen.has(key)) {
+      seen.add(key);
+      queue.push(matchup);
+    }
+  }
+  return queue;
+}
+
+export function buildMatchupQueue(s: Settings): Matchup[] {
+  if (s.mode === 'daily') {
+    return getDailyMatchups(DAILY_QUESTION_COUNT, s.dailyDate, s.dailyMode === 'pro');
+  } else {
+    return getRandomMatchups(s);
+  }
+  
 }

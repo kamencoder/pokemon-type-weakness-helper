@@ -39,7 +39,9 @@ export function SettingsPanel({
               <button
                 key={mode}
                 className={`settings-option${pendingSettings.mode === mode ? ' active' : ''}`}
-                onClick={() => setPendingSettings(s => ({ ...s, mode }))}
+                onClick={() => {
+                  setPendingSettings(s => ({ ...s, mode }));
+                }}
                 aria-pressed={pendingSettings.mode === mode}
               >
                 {label}
